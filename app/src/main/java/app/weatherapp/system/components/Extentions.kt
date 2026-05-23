@@ -1,4 +1,4 @@
-package system.components
+package app.weatherapp.system.components
 
 import app.weatherapp.domain.model.HourUi
 

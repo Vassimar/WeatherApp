@@ -1,4 +1,4 @@
-package system.screens
+package app.weatherapp.system.screens
 
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -29,7 +29,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import app.weatherapp.R
-import system.Routes
+import app.weatherapp.system.Routes
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable

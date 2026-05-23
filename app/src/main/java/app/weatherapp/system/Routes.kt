@@ -1,4 +1,4 @@
-package system
+package app.weatherapp.system
 
 sealed class Routes(val routes: String) {
 

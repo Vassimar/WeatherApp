@@ -1,4 +1,4 @@
-package system.screens
+package app.weatherapp.system.screens
 
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -43,12 +43,12 @@ import app.weatherapp.ui.theme.getWeatherTheme
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import org.koin.androidx.compose.koinViewModel
-import system.components.displayDay
-import system.components.displayTime
-import system.components.fakeAstrology
-import system.components.fakeForecastWeather
-import system.components.fakeHourUi
-import system.components.fakeWeather
+import app.weatherapp.system.components.displayDay
+import app.weatherapp.system.components.displayTime
+import app.weatherapp.system.components.fakeAstrology
+import app.weatherapp.system.components.fakeForecastWeather
+import app.weatherapp.system.components.fakeHourUi
+import app.weatherapp.system.components.fakeWeather
 
 @Composable
 internal fun SelectedWeatherScreen(

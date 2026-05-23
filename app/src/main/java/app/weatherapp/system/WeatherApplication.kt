@@ -1,4 +1,4 @@
-package system
+package app.weatherapp.system
 
 import android.app.Application
 import app.weatherapp.di.appModule
