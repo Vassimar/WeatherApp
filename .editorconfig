@@ -1,0 +1,4 @@
+[*.kt]
+ktlint_function_naming_ignore_when_annotated_with=Composable,Preview
+ktlint_standard_trailing-comma-on-call-site = disabled
+ktlint_standard_trailing-comma-on-declaration-site = disabled

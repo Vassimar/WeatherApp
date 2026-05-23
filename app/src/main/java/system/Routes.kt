@@ -1,0 +1,18 @@
+package system
+
+sealed class Routes(val routes: String) {
+
+    object MainWeatherScreen : Routes("weather?city={city}") {
+        fun weatherWithCity(city: String?): String {
+            return if (city != null) "weather?city=$city" else "weather"
+        }
+    }
+
+    object SavedWeatherScreen : Routes("saved")
+
+    object CityWeatherScreen : Routes("city_weather_screen/{cityId}") {
+        fun cityRoute(cityId: Int): String {
+            return "city_weather_screen/$cityId"
+        }
+    }
+}
