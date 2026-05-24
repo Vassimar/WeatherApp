@@ -1,20 +1,11 @@
 package app.weatherapp.presentation
 
-import android.os.Build
+
 import android.util.Log
-import androidx.annotation.RequiresApi
-
-
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import app.weatherapp.domain.model.ForecastUi
 import app.weatherapp.domain.model.HourUi
 import app.weatherapp.domain.repository.WeatherRepository
-import app.weatherapp.network.api.WeatherApiService
-import app.weatherapp.network.networkData.Hour
-import app.weatherapp.network.repository.WeatherRepositoryImp
-
-
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
