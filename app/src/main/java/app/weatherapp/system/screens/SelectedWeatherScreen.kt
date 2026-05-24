@@ -18,7 +18,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
@@ -41,19 +40,19 @@ import app.weatherapp.presentation.AstroUiState
 import app.weatherapp.presentation.ForecastUiState
 import app.weatherapp.presentation.SelectedWeatherScreenViewModel
 import app.weatherapp.presentation.WeatherUiState
-import app.weatherapp.ui.theme.Typography
-import app.weatherapp.ui.theme.WeatherCardTheme
-import app.weatherapp.ui.theme.getWeatherTheme
-import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
-import com.bumptech.glide.integration.compose.GlideImage
-import org.koin.androidx.compose.koinViewModel
 import app.weatherapp.system.components.displayDay
 import app.weatherapp.system.components.displayTime
 import app.weatherapp.system.components.fakeAstrology
 import app.weatherapp.system.components.fakeForecastWeather
 import app.weatherapp.system.components.fakeHourUi
 import app.weatherapp.system.components.fakeWeather
+import app.weatherapp.ui.theme.Typography
+import app.weatherapp.ui.theme.WeatherCardTheme
 import app.weatherapp.ui.theme.getWeatherBoxTheme
+import app.weatherapp.ui.theme.getWeatherTheme
+import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
+import com.bumptech.glide.integration.compose.GlideImage
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 internal fun SelectedWeatherScreen(
