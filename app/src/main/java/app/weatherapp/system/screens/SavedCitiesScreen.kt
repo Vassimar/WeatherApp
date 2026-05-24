@@ -13,37 +13,19 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import app.weatherapp.presentation.SavedCitiesScreenViewModel
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
-internal fun SavedCitiesScreen() {
-    val testURL: String = "https:" + "//cdn.weatherapi.com/weather/64x64/day/122.png"
-    val cities: List<SavedCities> =
-        listOf(
-            SavedCities(
-                1,
-                "Prague",
-                10.6,
-                testURL
-            ),
-            SavedCities(
-                2,
-                "Prague",
-                13.6,
-                testURL
-            ),
-            SavedCities(
-                3,
-                "Prague",
-                11.6,
-                testURL
-            )
-        )
+internal fun SavedCitiesScreen(viewModel: SavedCitiesScreenViewModel = koinViewModel()) {
+    val cities by viewModel.savedCities.collectAsState()
     SavedCitiesContent(cities)
 }
 
@@ -53,8 +35,7 @@ private fun SavedCitiesContent(cities: List<SavedCities>) {
     LazyColumn(
         modifier = Modifier.fillMaxSize()
     ) {
-        items(cities, key = { it.id }) { city ->
-
+        items(cities) { city ->
             ElevatedCard(
                 Modifier
                     .fillMaxWidth()
@@ -76,7 +57,7 @@ private fun SavedCitiesContent(cities: List<SavedCities>) {
                     )
 
                     Text(
-                        text = "${city.temp}",
+                        text = city.temp,
                     )
                     GlideImage(
                         model = city.img,
@@ -90,35 +71,35 @@ private fun SavedCitiesContent(cities: List<SavedCities>) {
 }
 
 data class SavedCities(
-    val id: Int,
     val name: String,
-    val temp: Double,
-    val img: String
+    val temp: String,
+    val img: String,
+    val time: String
 )
-
-@Preview
-@Composable
-fun ContentPreview() {
-    SavedCitiesContent(
-        listOf(
-            SavedCities(
-                1,
-                "Prague",
-                10.6,
-                "https://icons.veryicon.com/png/o/leisure/tourism-icon/a-sunny-day-1.png"
-            ),
-            SavedCities(
-                2,
-                "Prague",
-                13.6,
-                "https://icons-for-free.com/iff/png/512/sunny+temperature+weather+icon-1320196637430890623.png"
-            ),
-            SavedCities(
-                3,
-                "Prague",
-                11.6,
-                "https://icons-for-free.com/iff/png/512/sunny+temperature+weather+icon-1320196637430890623.png"
+/*
+    @Preview
+    @Composable
+    fun ContentPreview() {
+        SavedCitiesContent(
+            listOf(
+                SavedCities(
+                    1,
+                    "Prague",
+                    10.6,
+                    "https://icons.veryicon.com/png/o/leisure/tourism-icon/a-sunny-day-1.png"
+                ),
+                SavedCities(
+                    2,
+                    "Prague",
+                    13.6,
+                    "https://icons-for-free.com/iff/png/512/sunny+temperature+weather+icon-1320196637430890623.png"
+                ),
+                SavedCities(
+                    3,
+                    "Prague",
+                    11.6,
+                    "https://icons-for-free.com/iff/png/512/sunny+temperature+weather+icon-1320196637430890623.png"
+                )
             )
         )
-    )
-}
+    }*/

@@ -26,6 +26,12 @@ class SelectedWeatherScreenViewModel(private val repo: WeatherRepository) : View
     val errorMessage = "Couldn't load weather"
     private val _weather = MutableStateFlow<WeatherUiState>(WeatherUiState.WeatherLoading)
     val weather: StateFlow<WeatherUiState> = _weather
+    fun saveCity(city: String){
+        viewModelScope.launch {
+            repo.saveCity(city)
+        }
+    }
+
 
     fun fetchCurrentWeather(city: String) {
         viewModelScope.launch {
@@ -79,20 +85,23 @@ class SelectedWeatherScreenViewModel(private val repo: WeatherRepository) : View
                 }
         }
     }
-}
 
-private fun computeForecastHours(forecastWeather: ForecastUiState.ForecastSuccess): List<HourUi> {
-    val localtime = forecastWeather.weatherCurrent.location.localtime
-    val today = localtime.substringBefore(" ")
-    val currentHour = localtime.substringAfter(" ").substringBefore(":").toIntOrNull() ?: 0
+    private fun computeForecastHours(forecastWeather: ForecastUiState.ForecastSuccess): List<HourUi> {
+        val localtime = forecastWeather.weatherCurrent.location.localtime
+        val today = localtime.substringBefore(" ")
+        val currentHour = localtime.substringAfter(" ").substringBefore(":").toIntOrNull() ?: 0
 
-    return forecastWeather.weatherCurrent.forecast.forecastDays
-        .flatMap { it.hour }
-        .filter { hour ->
-            val (hourDate, hourTime) = hour.time.split(" ", limit = 2)
-            val hourOfDay = hourTime.substringBefore(":").toIntOrNull() ?: return@filter false
-            if (hourDate == today) hourOfDay >= currentHour else true
-        }
+        return forecastWeather.weatherCurrent.forecast.forecastDays
+            .flatMap { it.hour }
+            .filter { hour ->
+                val (hourDate, hourTime) = hour.time.split(" ", limit = 2)
+                val hourOfDay = hourTime.substringBefore(":").toIntOrNull() ?: return@filter false
+                if (hourDate == today) hourOfDay >= currentHour else true
+            }
+
+    }
+
+
 }
 
 

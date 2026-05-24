@@ -71,6 +71,7 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.ktor.client.okhttp)
     implementation(libs.compose)
+    implementation(libs.androidx.datastore.preferences)
 }
 detekt {
     config.setFrom("$rootDir/detekt.yml")

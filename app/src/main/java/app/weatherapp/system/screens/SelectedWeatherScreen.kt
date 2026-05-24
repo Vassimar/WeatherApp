@@ -1,5 +1,6 @@
 package app.weatherapp.system.screens
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -28,10 +29,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import app.weatherapp.R
 import app.weatherapp.domain.model.HourUi
 import app.weatherapp.presentation.AstroUiState
 import app.weatherapp.presentation.ForecastUiState
@@ -49,6 +53,7 @@ import app.weatherapp.system.components.fakeAstrology
 import app.weatherapp.system.components.fakeForecastWeather
 import app.weatherapp.system.components.fakeHourUi
 import app.weatherapp.system.components.fakeWeather
+import app.weatherapp.ui.theme.getWeatherBoxTheme
 
 @Composable
 internal fun SelectedWeatherScreen(
@@ -62,12 +67,24 @@ internal fun SelectedWeatherScreen(
     val isRefreshing by viewModel.isRefreshing.collectAsState()
     val forecast by viewModel.forecast.collectAsState()
     val forecastShown by viewModel.forecastHoursShown.collectAsState()
+    val backgroundRes = when (val state = weather) {
+        is WeatherUiState.WeatherSuccess -> getWeatherBoxTheme(
+            conditionCode = state.weatherCurrent.current.condition.code,
+            isDay = state.weatherCurrent.current.is_day
+        )
+        else -> R.drawable.default_screen
+    }
 
     LaunchedEffect(city) {
         viewModel.fetchCurrentWeather(city)
         viewModel.fetchAstrology(city)
         viewModel.fetchForecast(city)
 
+    }
+    LaunchedEffect(weather) {
+        if (weather is WeatherUiState.WeatherSuccess) {
+            viewModel.saveCity(city)
+        }
     }
 
     PullToRefreshBox(
@@ -83,7 +100,8 @@ internal fun SelectedWeatherScreen(
             weatherState = weather,
             astrologyState = astrology,
             forecastState = forecast,
-            forecastShown = forecastShown
+            forecastShown = forecastShown,
+            backgroundRes = backgroundRes
         )
     }
 }
@@ -94,12 +112,19 @@ internal fun SelectedWeatherScreenContent(
     astrologyState: AstroUiState,
     weatherState: WeatherUiState,
     forecastState: ForecastUiState,
-    forecastShown: List<HourUi>
+    forecastShown: List<HourUi>,
+    backgroundRes:Int
 ) {
     BoxWithConstraints(
         modifier = Modifier.fillMaxSize()
     ) {
         val screenHeight: Dp = maxHeight
+        Image(
+            painter = painterResource(backgroundRes),
+            contentDescription = "background_image",
+            modifier = Modifier.matchParentSize(),
+            contentScale = ContentScale.Crop
+        )
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -115,7 +140,7 @@ internal fun SelectedWeatherScreenContent(
                 forecastState = forecastState,
                 forecastShown,
 
-            )
+                )
         }
     }
 }
@@ -127,7 +152,8 @@ private fun WeatherContent(
     astrologyState: AstroUiState,
     forecastState: ForecastUiState,
     forecastShown: List<HourUi>,
-) {
+
+    ) {
     val padding = 8.dp
     when (weatherState) {
         is WeatherUiState.WeatherLoading ->
@@ -137,35 +163,22 @@ private fun WeatherContent(
             ) { CircularProgressIndicator() }
 
         is WeatherUiState.WeatherSuccess -> {
+
             val myTheme = getWeatherTheme(
                 conditionCode = weatherState.weatherCurrent.current.condition.code,
                 isDay = weatherState.weatherCurrent.current.is_day
             )
-
-            ElevatedCard(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                colors = CardColors(
-                    containerColor = myTheme.containerColor,
-                    contentColor = myTheme.contentColor,
-                    disabledContainerColor = Color.Transparent,
-                    disabledContentColor = Color.DarkGray
-                ),
-                shape = RoundedCornerShape(12.dp)
-            ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(padding),
 
                     ) {
-                    WeatherMainCard(weatherState, padding,myTheme)
+                    WeatherMainCard(weatherState, padding, myTheme)
                     WeatherDetailCard(weatherState, myTheme, padding)
                     ForecastContent(forecastState, padding, theme = myTheme, forecastShown)
                     AstrologyContent(astrologyState, theme = myTheme, padding)
                 }
-            }
-
         }
 
         is WeatherUiState.WeatherError -> Text(weatherState.message)
@@ -185,8 +198,10 @@ private fun WeatherMainCard(
             containerColor = Color.Transparent,
             contentColor = theme.contentColor,
             disabledContainerColor = Color.Transparent,
-            disabledContentColor = Color.Transparent
-        )
+            disabledContentColor = Color.Transparent,
+        ),
+        shape = RoundedCornerShape(12.dp)
+
     ) {
         Column(
             modifier = Modifier
@@ -250,12 +265,12 @@ private fun WeatherDetailCard(
             .fillMaxWidth()
             .padding(top = 40.dp, bottom = 40.dp),
         colors = CardColors(
-            containerColor = theme.detailCardColor,
+            containerColor = theme.detailCardColor.copy(alpha = 0.1f),
             contentColor = theme.contentColor,
             disabledContainerColor = Color.Transparent,
             disabledContentColor = Color.DarkGray
         ),
-        shape = RoundedCornerShape(12.dp)
+        shape = RoundedCornerShape(24.dp)
     ) {
         Row(
             modifier = Modifier
@@ -326,7 +341,7 @@ private fun ForecastContent(
                     disabledContainerColor = Color.Transparent,
                     disabledContentColor = Color.DarkGray,
                 ),
-                shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(24.dp)
             ) {
                 Row(
                     modifier = Modifier
@@ -372,12 +387,12 @@ private fun AstrologyContent(astrologyState: AstroUiState, theme: WeatherCardThe
                     .fillMaxWidth()
                     .padding(top = 40.dp, bottom = 40.dp),
                 colors = CardColors(
-                    containerColor = theme.astroCardColor,
+                    containerColor = theme.astroCardColor.copy(alpha = 0.3f),
                     contentColor = theme.contentColor,
                     disabledContainerColor = Color.Transparent,
                     disabledContentColor = Color.DarkGray,
                 ),
-                shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(24.dp)
             ) {
                 Column(
                     modifier = Modifier
@@ -403,7 +418,8 @@ private fun PreviewContent() {
         weatherState = WeatherUiState.WeatherSuccess(fakeWeather),
         astrologyState = AstroUiState.AstroSuccess(fakeAstrology),
         forecastState = ForecastUiState.ForecastSuccess(fakeForecastWeather),
-        forecastShown = fakeHourUi
+        forecastShown = fakeHourUi,
+        backgroundRes = R.drawable.default_screen
     )
 }
 

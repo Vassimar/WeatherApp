@@ -1,7 +1,5 @@
 package app.weatherapp.system.screens
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -31,7 +29,6 @@ import androidx.navigation.navArgument
 import app.weatherapp.R
 import app.weatherapp.system.Routes
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 internal fun MainScreen() {
     val navController = rememberNavController()
@@ -52,7 +49,6 @@ internal fun MainScreen() {
     )
 }
 
-@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun MainScreenContent(
