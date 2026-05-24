@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 class ForecastDay(
-    val astro: Astro?=null,
+    val astro: Astro? = null,
     val date: String,
     val date_epoch: Int,
     val day: Day,

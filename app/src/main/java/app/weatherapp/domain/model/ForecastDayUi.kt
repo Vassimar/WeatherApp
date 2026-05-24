@@ -1,7 +1,7 @@
 package app.weatherapp.domain.model
 
 data class ForecastDayUi(
-    val astro: AstroUi?=null,
+    val astro: AstroUi? = null,
     val date: String,
     val dateEpoch: Int,
     val day: DayUi,

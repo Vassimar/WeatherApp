@@ -1,7 +1,5 @@
 package app.weatherapp.domain.model
 
-import app.weatherapp.network.networkData.Condition
-
 data class CurrentUi(
     val chance_of_rain: Int,
     val chance_of_snow: Int,

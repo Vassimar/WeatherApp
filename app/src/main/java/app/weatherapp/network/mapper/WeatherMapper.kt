@@ -6,6 +6,11 @@ import app.weatherapp.domain.model.AstronomyWeather
 import app.weatherapp.domain.model.ConditionUI
 import app.weatherapp.domain.model.CurrentUi
 import app.weatherapp.domain.model.CurrentWeather
+import app.weatherapp.domain.model.DayUi
+import app.weatherapp.domain.model.ForecastDayUi
+import app.weatherapp.domain.model.ForecastUi
+import app.weatherapp.domain.model.ForecastWeather
+import app.weatherapp.domain.model.HourUi
 import app.weatherapp.domain.model.LocationUi
 import app.weatherapp.network.networkData.Astro
 import app.weatherapp.network.networkData.Astronomy
@@ -13,18 +18,12 @@ import app.weatherapp.network.networkData.AstronomyWeatherModel
 import app.weatherapp.network.networkData.Condition
 import app.weatherapp.network.networkData.Current
 import app.weatherapp.network.networkData.CurrentWeatherModel
-import app.weatherapp.network.networkData.Location
-import app.weatherapp.domain.model.DayUi
-import app.weatherapp.domain.model.ForecastDayUi
-import app.weatherapp.domain.model.ForecastUi
-import app.weatherapp.domain.model.ForecastWeather
-import app.weatherapp.domain.model.HourUi
 import app.weatherapp.network.networkData.Day
 import app.weatherapp.network.networkData.Forecast
 import app.weatherapp.network.networkData.ForecastDay
 import app.weatherapp.network.networkData.ForecastWeatherModel
 import app.weatherapp.network.networkData.Hour
-
+import app.weatherapp.network.networkData.Location
 
 internal fun Astro.toDomain(): AstroUi {
     return AstroUi(
@@ -36,8 +35,6 @@ internal fun Astro.toDomain(): AstroUi {
         moonset = moonset,
         sunrise = sunrise,
         sunset = sunset
-
-
     )
 }
 
@@ -51,8 +48,6 @@ internal fun AstroUi.toApi(): Astro {
         moonset = moonset,
         sunrise = sunrise,
         sunset = sunset
-
-
     )
 }
 
@@ -140,7 +135,6 @@ internal fun CurrentUi.toApi(): Current =
         uv = uv
     )
 
-
 internal fun CurrentWeatherModel.toDomain(): CurrentWeather {
     return CurrentWeather(
         current = current.toDomain(),
@@ -168,7 +162,6 @@ internal fun AstronomyWeather.toApi(): AstronomyWeatherModel {
         location = location.toApi()
     )
 }
-
 
 internal fun Day.toDomain(): DayUi =
     DayUi(

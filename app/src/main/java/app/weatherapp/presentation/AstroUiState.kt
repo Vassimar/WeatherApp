@@ -1,7 +1,6 @@
 package app.weatherapp.presentation
 
 import app.weatherapp.domain.model.AstronomyWeather
-import app.weatherapp.network.networkData.AstronomyWeatherModel
 
 sealed class AstroUiState {
     object AstroLoading : AstroUiState()

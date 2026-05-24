@@ -1,6 +1,5 @@
 package app.weatherapp.domain.model
 
-
 data class DayUi(
     val avgHumidity: Int,
     val avgTempC: Double,

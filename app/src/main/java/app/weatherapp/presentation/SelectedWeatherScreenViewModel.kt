@@ -1,6 +1,5 @@
 package app.weatherapp.presentation
 
-
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -17,12 +16,12 @@ class SelectedWeatherScreenViewModel(private val repo: WeatherRepository) : View
     val errorMessage = "Couldn't load weather"
     private val _weather = MutableStateFlow<WeatherUiState>(WeatherUiState.WeatherLoading)
     val weather: StateFlow<WeatherUiState> = _weather
-    fun saveCity(city: String){
+
+    fun saveCity(city: String) {
         viewModelScope.launch {
             repo.saveCity(city)
         }
     }
-
 
     fun fetchCurrentWeather(city: String) {
         viewModelScope.launch {
@@ -35,7 +34,6 @@ class SelectedWeatherScreenViewModel(private val repo: WeatherRepository) : View
                 .onFailure { exception ->
                     Log.e("WeatherVM", "Failed to load weather: ${exception.message}")
                     _weather.value = WeatherUiState.WeatherError(errorMessage)
-
                 }
             _isRefreshing.value = false
         }
@@ -61,6 +59,7 @@ class SelectedWeatherScreenViewModel(private val repo: WeatherRepository) : View
     val forecast = _forecast.asStateFlow()
     private val _forecastHoursShown = MutableStateFlow<List<HourUi>>(emptyList())
     val forecastHoursShown = _forecastHoursShown.asStateFlow()
+
     fun fetchForecast(city: String) {
         viewModelScope.launch {
             _forecast.value = ForecastUiState.ForecastLoading
@@ -89,11 +88,5 @@ class SelectedWeatherScreenViewModel(private val repo: WeatherRepository) : View
                 val hourOfDay = hourTime.substringBefore(":").toIntOrNull() ?: return@filter false
                 if (hourDate == today) hourOfDay >= currentHour else true
             }
-
     }
-
-
 }
-
-
-

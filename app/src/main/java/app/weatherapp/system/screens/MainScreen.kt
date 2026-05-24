@@ -37,15 +37,18 @@ internal fun MainScreen() {
     var searchText by remember { mutableStateOf("") }
     var isSearchActive by remember { mutableStateOf(false) }
     MainScreenContent(
-        navController, currentRoute, searchText = searchText,
+        navController,
+        currentRoute,
+        searchText = searchText,
         isSearchActive = isSearchActive,
-        onSearchTextChange = { searchText = it },
+        onSearchTextChange = {" "},
         onSearch = {
             navController.navigate(Routes.MainWeatherScreen.weatherWithCity(searchText))
             isSearchActive = false
             searchText = ""
         },
-        onSearchToggle = { isSearchActive = !isSearchActive }
+        onSearchToggle = { isSearchActive = !isSearchActive },
+        onNavigate = { city -> navController.navigate(Routes.MainWeatherScreen.weatherWithCity(city)) }
     )
 }
 
@@ -58,11 +61,9 @@ private fun MainScreenContent(
     isSearchActive: Boolean,
     onSearchTextChange: (String) -> Unit,
     onSearch: () -> Unit,
-    onSearchToggle: () -> Unit
-
-
+    onSearchToggle: () -> Unit,
+    onNavigate: (String) -> Unit
 ) {
-
     Scaffold(
         topBar = {
             if (isSearchActive) {
@@ -70,7 +71,8 @@ private fun MainScreenContent(
                     modifier = Modifier.statusBarsPadding(),
                     title = {
                         TopAppBarSearchField(
-                            searchText, onSearchTextChange
+                            searchText,
+                            onSearchTextChange
                         )
                     },
                     navigationIcon = { TopAppBarSearchIcon(onSearch) }
@@ -92,10 +94,10 @@ private fun MainScreenContent(
                 NavigationBarItem(
                     selected = currentRoute == Routes.MainWeatherScreen.routes,
                     onClick = {
-                        navController.navigate(Routes.MainWeatherScreen.weatherWithCity(null)) {
-                            launchSingleTop = true
-                            popUpTo(Routes.MainWeatherScreen.routes)
-                        }
+                        onClickNavigation(
+                            navController,
+                            Routes.MainWeatherScreen.weatherWithCity(null)
+                        )
                     },
                     icon = {
                         Icon(painterResource(R.drawable.outline_cloud_24), "Home")
@@ -106,7 +108,7 @@ private fun MainScreenContent(
                     onClick = {
                         onClickNavigation(
                             navController = navController,
-                            destination = Routes.SavedWeatherScreen.routes,
+                            destination = Routes.SavedWeatherScreen.routes
                         )
                     },
                     icon = {
@@ -125,18 +127,23 @@ private fun MainScreenContent(
             modifier = Modifier.padding(paddingValues)
         ) {
             composable(
-                route = Routes.MainWeatherScreen.routes,  // "weather?city={city}"
-                arguments = listOf(navArgument("city") {
-                    type = NavType.StringType
-                    nullable = true
-                    defaultValue = null
-                })
+                route = Routes.MainWeatherScreen.routes,
+                arguments =
+                    listOf(
+                        navArgument("city") {
+                            type = NavType.StringType
+                            nullable = true
+                            defaultValue = null
+                        }
+                    )
             ) { backStackEntry ->
                 val city = backStackEntry.arguments?.getString("city")
                 SelectedWeatherScreen(text = city)
             }
-            composable(Routes.SavedWeatherScreen.routes) {  // "saved"
-                SavedCitiesScreen()
+            composable(Routes.SavedWeatherScreen.routes) {
+                SavedCitiesScreen(
+                    onNavigate = onNavigate
+                )
             }
         }
     }
@@ -157,8 +164,7 @@ private fun onClickNavigation(
 private fun TopAppBarSearchField(
     searchText: String,
     onSearchTextChange: (String) -> Unit,
-
-    ) {
+) {
     TextField(
         value = searchText,
         onValueChange = onSearchTextChange,
@@ -169,11 +175,8 @@ private fun TopAppBarSearchField(
 }
 
 @Composable
-private fun TopAppBarSearchIcon(
-    onSearch: () -> Unit
-) {
+private fun TopAppBarSearchIcon(onSearch: () -> Unit) {
     IconButton(onClick = onSearch) {
         Icon(painterResource(R.drawable.baseline_done_24), "search")
     }
 }
-

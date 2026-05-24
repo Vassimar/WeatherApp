@@ -31,14 +31,14 @@ val appModule =
                 }
             }
         }
-        single{
+        single {
             PreferenceDataStoreFactory.create(
                 produceFile = {
                     androidContext().dataStoreFile("saved_weather_db.preferences_pb")
                 }
             )
         }
-        singleOf(::WeatherRepositoryImp){bind<WeatherRepository>()}
+        singleOf(::WeatherRepositoryImp) { bind<WeatherRepository>() }
         singleOf(::WeatherApiService)
         viewModelOf(::SelectedWeatherScreenViewModel)
         viewModelOf(::SavedCitiesScreenViewModel)

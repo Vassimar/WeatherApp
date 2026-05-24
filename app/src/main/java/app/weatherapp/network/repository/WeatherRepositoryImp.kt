@@ -14,7 +14,6 @@ import app.weatherapp.network.mapper.toDomain
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-
 internal class WeatherRepositoryImp(
     private val api: WeatherApiService,
     private val dataStore: DataStore<Preferences>
@@ -25,7 +24,6 @@ internal class WeatherRepositoryImp(
         } catch (e: Exception) {
             Result.failure(e)
         }
-
     }
 
     override suspend fun getForecast(city: String): Result<ForecastWeather> {
@@ -35,7 +33,6 @@ internal class WeatherRepositoryImp(
             Log.e("ForecastRepo", "API call failed: ${e.message}", e)
             Result.failure(e)
         }
-
     }
 
     override suspend fun getAstronomy(city: String): Result<AstronomyWeather> {
@@ -44,15 +41,13 @@ internal class WeatherRepositoryImp(
         } catch (e: Exception) {
             Log.e("WeatherRepo", "API call failed: ${e.message}", e)
             Result.failure(e)
-
         }
     }
 
     private val CITIES_KEY = stringSetPreferencesKey("favorite_cities")
 
     override val favouriteCities: Flow<List<String>>
-        get() =dataStore.data.map { preferences -> preferences[CITIES_KEY]?.toList() ?: emptyList() }
-
+        get() = dataStore.data.map { preferences -> preferences[CITIES_KEY]?.toList() ?: emptyList() }
 
     override suspend fun saveCity(city: String) {
         dataStore.edit { prefs ->
@@ -68,4 +63,3 @@ internal class WeatherRepositoryImp(
         }
     }
 }
-

@@ -1,7 +1,6 @@
 package app.weatherapp.presentation
 
 import app.weatherapp.domain.model.CurrentWeather
-import app.weatherapp.network.networkData.CurrentWeatherModel
 
 sealed class WeatherUiState {
     object WeatherLoading : WeatherUiState()

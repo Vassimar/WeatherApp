@@ -7,11 +7,14 @@ import kotlinx.coroutines.flow.Flow
 
 interface WeatherRepository {
     suspend fun getCurrentWeather(city: String): Result<CurrentWeather>
+
     suspend fun getForecast(city: String): Result<ForecastWeather>
+
     suspend fun getAstronomy(city: String): Result<AstronomyWeather>
-    suspend fun saveCity(city:String)
-    suspend fun removeCity(city:String)
+
+    suspend fun saveCity(city: String)
+
+    suspend fun removeCity(city: String)
+
     val favouriteCities: Flow<List<String>>
-
-
 }

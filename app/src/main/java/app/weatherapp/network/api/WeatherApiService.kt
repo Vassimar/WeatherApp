@@ -29,13 +29,14 @@ internal class WeatherApiService(private val client: HttpClient) {
     }
 
     suspend fun getForecast(city: String): ForecastWeatherModel {
-        val response = client.get("$baseUrl/$forecast") {
-            parameter("key", apiKey)
-            parameter("q", city)
-            parameter("days", 2)
-            parameter("aqi", "no")
-            parameter("alerts", "no")
-        }
+        val response =
+            client.get("$baseUrl/$forecast") {
+                parameter("key", apiKey)
+                parameter("q", city)
+                parameter("days", 2)
+                parameter("aqi", "no")
+                parameter("alerts", "no")
+            }
         Log.d("ForecastRaw", response.bodyAsText()) // 👈 add this
         return response.body<ForecastWeatherModel>()
     }
