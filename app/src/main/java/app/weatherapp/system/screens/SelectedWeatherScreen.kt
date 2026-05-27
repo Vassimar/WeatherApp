@@ -1,5 +1,6 @@
 package app.weatherapp.system.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -16,7 +17,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardColors
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -30,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -47,9 +48,9 @@ import app.weatherapp.system.components.fakeForecastWeather
 import app.weatherapp.system.components.fakeHourUi
 import app.weatherapp.system.components.fakeWeather
 import app.weatherapp.ui.theme.Typography
-import app.weatherapp.ui.theme.WeatherCardTheme
+import app.weatherapp.ui.theme.frostCard
+import app.weatherapp.ui.theme.getTextColor
 import app.weatherapp.ui.theme.getWeatherBoxTheme
-import app.weatherapp.ui.theme.getWeatherTheme
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import org.koin.androidx.compose.koinViewModel
@@ -61,7 +62,6 @@ internal fun SelectedWeatherScreen(
 ) {
     val pullRefreshState = rememberPullToRefreshState()
     val weather by viewModel.weather.collectAsState()
-    val city = text ?: "London"
     val astrology by viewModel.astrology.collectAsState()
     val isRefreshing by viewModel.isRefreshing.collectAsState()
     val forecast by viewModel.forecast.collectAsState()
@@ -73,26 +73,31 @@ internal fun SelectedWeatherScreen(
                     conditionCode = state.weatherCurrent.current.condition.code,
                     isDay = state.weatherCurrent.current.is_day
                 )
-            else -> R.drawable.default_screen
-        }
 
-    LaunchedEffect(city) {
-        viewModel.fetchCurrentWeather(city)
-        viewModel.fetchAstrology(city)
-        viewModel.fetchForecast(city)
+            else -> null
+        }
+    val textColor =
+        when (val state = weather) {
+            is WeatherUiState.WeatherSuccess ->
+                getTextColor(isDay = state.weatherCurrent.current.is_day)
+
+            else -> Color.White
+        }
+    if (text == null) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
+        }
+        return
     }
-    LaunchedEffect(weather) {
-        if (weather is WeatherUiState.WeatherSuccess) {
-            viewModel.saveCity(city)
+    LaunchedEffect(text) {
+        text.let {
+            viewModel.loadCity(it)
         }
     }
-
     PullToRefreshBox(
         isRefreshing = isRefreshing,
         onRefresh = {
-            viewModel.fetchCurrentWeather(city)
-            viewModel.fetchAstrology(city)
-            viewModel.fetchForecast(city)
+            text.let { viewModel.loadCity(it) }
         },
         state = pullRefreshState
     ) {
@@ -101,7 +106,8 @@ internal fun SelectedWeatherScreen(
             astrologyState = astrology,
             forecastState = forecast,
             forecastShown = forecastShown,
-            backgroundRes = backgroundRes
+            backgroundRes = backgroundRes,
+            textColor = textColor,
         )
     }
 }
@@ -113,24 +119,29 @@ internal fun SelectedWeatherScreenContent(
     weatherState: WeatherUiState,
     forecastState: ForecastUiState,
     forecastShown: List<HourUi>,
-    backgroundRes: Int
+    backgroundRes: Int?,
+    textColor: Color,
 ) {
     BoxWithConstraints(
-        modifier = Modifier.fillMaxSize()
+        modifier =
+            Modifier
+                .fillMaxSize()
     ) {
-        Image(
-            painter = painterResource(backgroundRes),
-            contentDescription = "background_image",
-            modifier = Modifier.matchParentSize(),
-            contentScale = ContentScale.Crop
-        )
+        backgroundRes?.let { bgRes ->
+            Image(
+                painter = painterResource(bgRes),
+                contentDescription = stringResource(R.string.default_background),
+                modifier = Modifier.matchParentSize(),
+                contentScale = ContentScale.Crop
+            )
+        }
+
         Column(
             modifier =
                 Modifier
                     .fillMaxWidth()
                     .heightIn(min = maxHeight)
-                    .verticalScroll(rememberScrollState())
-                    .padding(4.dp),
+                    .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -139,6 +150,7 @@ internal fun SelectedWeatherScreenContent(
                 astrologyState,
                 forecastState = forecastState,
                 forecastShown,
+                textColor
             )
         }
     }
@@ -151,6 +163,7 @@ private fun WeatherContent(
     astrologyState: AstroUiState,
     forecastState: ForecastUiState,
     forecastShown: List<HourUi>,
+    textColor: Color
 ) {
     val padding = 8.dp
     when (weatherState) {
@@ -161,21 +174,16 @@ private fun WeatherContent(
             ) { CircularProgressIndicator() }
 
         is WeatherUiState.WeatherSuccess -> {
-            val myTheme =
-                getWeatherTheme(
-                    conditionCode = weatherState.weatherCurrent.current.condition.code,
-                    isDay = weatherState.weatherCurrent.current.is_day
-                )
             Column(
                 modifier =
                     Modifier
                         .fillMaxWidth()
                         .padding(padding),
             ) {
-                WeatherMainCard(weatherState, padding, myTheme)
-                WeatherDetailCard(weatherState, myTheme, padding)
-                ForecastContent(forecastState, padding, theme = myTheme, forecastShown)
-                AstrologyContent(astrologyState, theme = myTheme, padding)
+                WeatherMainCard(weatherState, padding, textColor)
+                WeatherDetailCard(weatherState, padding, textColor)
+                ForecastContent(forecastState, padding, forecastShown, textColor)
+                AstrologyContent(astrologyState, padding, textColor)
             }
         }
 
@@ -188,18 +196,14 @@ private fun WeatherContent(
 private fun WeatherMainCard(
     weather: WeatherUiState.WeatherSuccess,
     padding: Dp,
-    theme: WeatherCardTheme
+    textColor: Color
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors =
-            CardColors(
-                containerColor = Color.Transparent,
-                contentColor = theme.contentColor,
-                disabledContainerColor = Color.Transparent,
-                disabledContentColor = Color.Transparent,
-            ),
-        shape = RoundedCornerShape(12.dp)
+        frostCard,
+        shape = RoundedCornerShape(20.dp),
+        border = BorderStroke(0.5.dp, Color.White.copy(alpha = 0.15f))
     ) {
         Column(
             modifier =
@@ -213,7 +217,7 @@ private fun WeatherMainCard(
                     Modifier
                         .size(64.dp),
                 model = weather.weatherCurrent.current.condition.icon,
-                contentDescription = "weather_icon",
+                contentDescription = stringResource(R.string.weather_Icon),
                 alignment = Alignment.Center
             )
             Text(
@@ -223,7 +227,8 @@ private fun WeatherMainCard(
                         .fillMaxWidth()
                         .padding(padding),
                 style = Typography.displayLarge,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                color = textColor
             )
             Text(
                 weather.weatherCurrent.location.country,
@@ -232,7 +237,8 @@ private fun WeatherMainCard(
                         .fillMaxWidth()
                         .padding(padding),
                 style = Typography.displaySmall,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                color = textColor
             )
             Text(
                 weather.weatherCurrent.current.temp_c,
@@ -241,7 +247,8 @@ private fun WeatherMainCard(
                         .fillMaxWidth()
                         .padding(padding),
                 style = Typography.headlineMedium,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                color = textColor
             )
             Text(
                 weather.weatherCurrent.location.localtime.substringAfter(" "),
@@ -250,7 +257,8 @@ private fun WeatherMainCard(
                         .fillMaxWidth()
                         .padding(padding),
                 style = Typography.titleMedium,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                color = textColor
             )
         }
     }
@@ -259,8 +267,8 @@ private fun WeatherMainCard(
 @Composable
 private fun WeatherDetailCard(
     weather: WeatherUiState.WeatherSuccess,
-    theme: WeatherCardTheme,
-    padding: Dp
+    padding: Dp,
+    textColor: Color
 ) {
     Card(
         modifier =
@@ -268,13 +276,9 @@ private fun WeatherDetailCard(
                 .fillMaxWidth()
                 .padding(top = 40.dp, bottom = 40.dp),
         colors =
-            CardColors(
-                containerColor = theme.detailCardColor.copy(alpha = 0.1f),
-                contentColor = theme.contentColor,
-                disabledContainerColor = Color.Transparent,
-                disabledContentColor = Color.DarkGray
-            ),
-        shape = RoundedCornerShape(24.dp)
+        frostCard,
+        shape = RoundedCornerShape(20.dp),
+        border = BorderStroke(0.5.dp, Color.White.copy(alpha = 0.15f))
     ) {
         Row(
             modifier =
@@ -284,36 +288,42 @@ private fun WeatherDetailCard(
         ) {
             Column {
                 Text(
-                    "Feels like:",
+                    stringResource(R.string.feels_like),
                     modifier = Modifier.padding(padding),
-                    style = Typography.labelMedium
+                    style = Typography.labelMedium,
+                    color = textColor
                 )
                 Text(
                     "${weather.weatherCurrent.current.feelslike_c}C",
                     modifier = Modifier.padding(padding),
-                    style = Typography.labelMedium
+                    style = Typography.labelMedium,
+                    color = textColor
                 )
                 Text(
                     "${weather.weatherCurrent.current.feelslike_f}F",
                     modifier = Modifier.padding(padding),
-                    style = Typography.labelMedium
+                    style = Typography.labelMedium,
+                    color = textColor
                 )
             }
             Column {
                 Text(
-                    "Humidity: ${weather.weatherCurrent.current.humidity}%",
+                    "${stringResource(R.string.humidity)} ${weather.weatherCurrent.current.humidity}%",
                     modifier = Modifier.padding(padding),
-                    style = Typography.labelMedium
+                    style = Typography.labelMedium,
+                    color = textColor
                 )
                 Text(
-                    "Chance of rain: ${weather.weatherCurrent.current.chance_of_rain}%",
+                    "${stringResource(R.string.rain_chance)} ${weather.weatherCurrent.current.chance_of_rain}%",
                     modifier = Modifier.padding(padding),
-                    style = Typography.labelMedium
+                    style = Typography.labelMedium,
+                    color = textColor
                 )
                 Text(
-                    "UV Index: ${weather.weatherCurrent.current.uv}",
+                    "${stringResource(R.string.uv_index)} ${weather.weatherCurrent.current.uv}",
                     modifier = Modifier.padding(padding),
-                    style = Typography.labelMedium
+                    style = Typography.labelMedium,
+                    color = textColor
                 )
             }
         }
@@ -325,8 +335,8 @@ private fun WeatherDetailCard(
 private fun ForecastContent(
     forecastState: ForecastUiState,
     padding: Dp,
-    theme: WeatherCardTheme,
-    forecastShown: List<HourUi>
+    forecastShown: List<HourUi>,
+    textColor: Color
 ) {
     when (forecastState) {
         is ForecastUiState.ForecastLoading -> CircularProgressIndicator()
@@ -334,20 +344,15 @@ private fun ForecastContent(
             val currentHour =
                 forecastState.weatherCurrent.location.localtime
                     .substringAfter(" ").substringBefore(":").toIntOrNull() ?: 0
-
             Card(
                 modifier =
                     Modifier
                         .padding(top = 40.dp, bottom = 40.dp)
                         .fillMaxWidth(),
                 colors =
-                    CardColors(
-                        containerColor = theme.forecastCardColor,
-                        contentColor = theme.contentColor,
-                        disabledContainerColor = Color.Transparent,
-                        disabledContentColor = Color.DarkGray,
-                    ),
-                shape = RoundedCornerShape(24.dp)
+                frostCard,
+                shape = RoundedCornerShape(20.dp),
+                border = BorderStroke(0.5.dp, Color.White.copy(alpha = 0.15f))
             ) {
                 Row(
                     modifier =
@@ -362,13 +367,17 @@ private fun ForecastContent(
                         ) {
                             GlideImage(
                                 hour.condition.icon,
-                                "weather_icon"
+                                stringResource(R.string.weather_Icon)
                             )
                             Text(
-                                hour.displayTime(currentHour)
+                                hour.displayTime(currentHour),
+                                color = textColor
                             )
-                            Text(hour.tempC)
-                            Text(hour.displayDay())
+                            Text(
+                                hour.tempC,
+                                color = textColor
+                            )
+                            Text(hour.displayDay(), color = textColor)
                         }
                     }
                 }
@@ -382,8 +391,8 @@ private fun ForecastContent(
 @Composable
 private fun AstrologyContent(
     astrologyState: AstroUiState,
-    theme: WeatherCardTheme,
-    padding: Dp
+    padding: Dp,
+    textColor: Color
 ) {
     when (astrologyState) {
         is AstroUiState.AstroLoading -> CircularProgressIndicator()
@@ -394,13 +403,9 @@ private fun AstrologyContent(
                         .fillMaxWidth()
                         .padding(top = 40.dp, bottom = 40.dp),
                 colors =
-                    CardColors(
-                        containerColor = theme.astroCardColor.copy(alpha = 0.3f),
-                        contentColor = theme.contentColor,
-                        disabledContainerColor = Color.Transparent,
-                        disabledContentColor = Color.DarkGray,
-                    ),
-                shape = RoundedCornerShape(24.dp)
+                frostCard,
+                shape = RoundedCornerShape(20.dp),
+                border = BorderStroke(0.5.dp, Color.White.copy(alpha = 0.15f))
             ) {
                 Column(
                     modifier =
@@ -409,9 +414,18 @@ private fun AstrologyContent(
                             .padding(padding),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Text("Sunset: ${astrologyState.astro.astronomy.astro.sunset}")
-                    Text("Sunrise: ${astrologyState.astro.astronomy.astro.sunrise}")
-                    Text("Moon looks like: ${astrologyState.astro.astronomy.astro.moon_phase}")
+                    Text(
+                        "${stringResource(R.string.sunset)} ${astrologyState.astro.astronomy.astro.sunset}",
+                        color = textColor
+                    )
+                    Text(
+                        "${stringResource(R.string.sunrise)} ${astrologyState.astro.astronomy.astro.sunrise}",
+                        color = textColor
+                    )
+                    Text(
+                        "${stringResource(R.string.moon_form)} ${astrologyState.astro.astronomy.astro.moon_phase}",
+                        color = textColor
+                    )
                 }
             }
         }
@@ -428,6 +442,7 @@ private fun PreviewContent() {
         astrologyState = AstroUiState.AstroSuccess(fakeAstrology),
         forecastState = ForecastUiState.ForecastSuccess(fakeForecastWeather),
         forecastShown = fakeHourUi,
-        backgroundRes = R.drawable.default_screen
+        backgroundRes = R.drawable.default_screen,
+        textColor = Color.White,
     )
 }

@@ -1,3 +1,15 @@
 <resources>
     <string name="app_name">Weather App</string>
+    <string name="weather">Weather</string>
+    <string name="saved_cities">Saved Cities</string>
+    <string name="search">Search city...</string>
+    <string name="default_background">default_background</string>
+    <string name="weather_Icon">weather icon</string>
+    <string name="sunset">Sunset :</string>
+    <string name="sunrise">Sunrise :</string>
+    <string name="moon_form">Moon phase :</string>
+    <string name="feels_like">Feels like :</string>
+    <string name="humidity">Humidity :</string>
+    <string name="rain_chance">Chance of rain :</string>
+    <string name="uv_index">UV index :</string>
 </resources>

@@ -10,6 +10,7 @@ import app.weatherapp.ui.theme.WeatherAppTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        window.setBackgroundDrawable(null)
         enableEdgeToEdge()
         setContent {
             WeatherAppTheme {

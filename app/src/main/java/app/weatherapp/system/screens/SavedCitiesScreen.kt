@@ -1,7 +1,6 @@
 package app.weatherapp.system.screens
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,7 +14,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
@@ -26,16 +24,16 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.weatherapp.R
 import app.weatherapp.domain.model.SavedCities
 import app.weatherapp.presentation.SavedCitiesScreenViewModel
+import app.weatherapp.ui.theme.getTextColor
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import org.koin.androidx.compose.koinViewModel
@@ -43,27 +41,19 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 internal fun SavedCitiesScreen(
     viewModel: SavedCitiesScreenViewModel = koinViewModel(),
-    onNavigate: (String) -> Unit
+    onNavigate: (String) -> Unit,
 ) {
     val cities by viewModel.savedCities.collectAsState()
     Box(
         modifier =
             Modifier
                 .fillMaxSize()
-    ) {
-        Image(
-            painterResource(R.drawable.default_screen),
-            contentDescription = "background_default",
-            Modifier
-                .fillMaxSize(),
-            contentScale = ContentScale.Crop
-        )
-        SavedCitiesContent(
-            cities,
-            { cityName -> viewModel.removeCity(cityName) },
-            onNavigate
-        )
-    }
+    )
+    SavedCitiesContent(
+        cities,
+        { cityName -> viewModel.removeCity(cityName) },
+        onNavigate,
+    )
 }
 
 @OptIn(ExperimentalGlideComposeApi::class)
@@ -71,13 +61,13 @@ internal fun SavedCitiesScreen(
 private fun SavedCitiesContent(
     cities: List<SavedCities>,
     onSwipeDelete: (String) -> Unit,
-    onNavigate: (String) -> Unit
+    onNavigate: (String) -> Unit,
 ) {
     LazyColumn(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize(),
     ) {
         items(cities, key = { it.cityKey }) { city ->
-            val textColor = if (city.isDay == 0) Color.Yellow else Color.Black
+            val textColor = getTextColor(city.isDay)
             val dismissState =
                 rememberSwipeToDismissBoxState(
                     positionalThreshold = { it * 0.8f }
@@ -99,22 +89,13 @@ private fun SavedCitiesContent(
                         .fillMaxWidth()
                         .wrapContentHeight()
                         .padding(4.dp)
-                        .border(
-                            3.dp,
-                            Color.White.copy(alpha = 0.4f),
-                            RoundedCornerShape(50)
-                        )
-                        .clip(
-                            RoundedCornerShape(50.dp)
-                        )
                 ) {
                     Image(
                         painterResource(city.code),
-                        contentDescription = "background_default_screen",
+                        contentDescription = stringResource(R.string.default_background),
                         modifier =
                             Modifier
-                                .matchParentSize()
-                                .clip(RoundedCornerShape(50)),
+                                .matchParentSize(),
                         contentScale = ContentScale.Crop
                     )
                     Row(
@@ -161,7 +142,7 @@ private fun SavedCitiesContent(
                         ) {
                             GlideImage(
                                 model = city.img,
-                                contentDescription = "weather_icon",
+                                contentDescription = stringResource(R.string.weather_Icon),
                                 Modifier.size(64.dp)
                             )
                         }
@@ -206,6 +187,6 @@ fun ContentPreview() {
             )
         ),
         onSwipeDelete = {},
-        onNavigate = {}
+        onNavigate = {},
     )
 }
